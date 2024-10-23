@@ -2,7 +2,7 @@
 
 ## React + Express.js + MySQL
 
-Let's walk through how to create a **React** and **Express.js** Address Book application with **MySQL** as the database, using Vite for the React frontend. The app will consist of a navigation bar with two pages:
+This is a walkthrough on how to create a **React** and **Express.js** Address Book application with **MySQL** as the database, using Vite for the React frontend. The app will consist of a navigation bar with two pages:
 
 - **Form Input Page**: Allows users to submit their name, email, phone, and address.
 - **Data Display Page**: Shows all the records entered into the MySQL database.
