@@ -22,16 +22,16 @@ jobs:
           node-version: '14'
 
       - name: Install Dependencies
-        run: npm install --prefix frontend && npm install --prefix backend
+        run: npm install --prefix client && npm install --prefix server
 
       - name: Build Frontend
-        run: npm run build --prefix frontend
+        run: npm run build --prefix client
 
       - name: Run Tests
-        run: npm test --prefix frontend && npm test --prefix backend
+        run: npm test --prefix client && npm test --prefix server
 
       - name: Zip Artifacts
-        run: zip -r build-artifacts.zip frontend/build
+        run: zip -r build-artifacts.zip client/build
 
       - name: Upload to S3
         env:
