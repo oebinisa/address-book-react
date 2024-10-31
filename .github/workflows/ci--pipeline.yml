@@ -23,8 +23,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          npm install --prefix ./client
-          npm install --prefix ./server
+          npm install --prefix client
+          npm install --prefix server
 
       - name: Build Frontend
         run: |
