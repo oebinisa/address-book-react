@@ -50,6 +50,8 @@ address-book-react/
 │   │   └── db.js                # MySQL connection
 │   ├── controllers/
 │   │   └── contactController.js  # Logic for CRUD operations
+│   ├── db/
+│   │   └── schema.sql
 │   ├── routes/
 │   │   └── contactRoutes.js      # Routes for the API
 │   ├── server.js                 # Main server file
@@ -423,6 +425,7 @@ button:focus-visible {
 1.
 
 1. **Run the backend** in the `server` directory:
+Script location: `server/db/schema.sql`
 
 ```bash
 cd server

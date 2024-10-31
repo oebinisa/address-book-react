@@ -1,0 +1,56 @@
+name: CI Pipeline for Address Book App
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install Dependencies
+        run: npm install --prefix frontend && npm install --prefix backend
+
+      - name: Build Frontend
+        run: npm run build --prefix frontend
+
+      - name: Run Tests
+        run: npm test --prefix frontend && npm test --prefix backend
+
+      - name: Zip Artifacts
+        run: zip -r build-artifacts.zip frontend/build
+
+      - name: Upload to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          aws s3 cp build-artifacts.zip s3://simartefacts/
+
+      - name: Send Email Notification
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        run: |
+          curl --request POST \
+          --url https://api.sendgrid.com/v3/mail/send \
+          --header "Authorization: Bearer $SENDGRID_API_KEY" \
+          --header "Content-Type: application/json" \
+          --data '{
+            "personalizations": [{"to": [{"email": "o.oluwapelumi@gmail.com"}]}],
+            "from": {"email": "sender@example.com"},
+            "subject": "CI Pipeline Completion",
+            "content": [{"type": "text/plain", "value": "CI pipeline for address-book-react completed successfully."}]
+          }'
