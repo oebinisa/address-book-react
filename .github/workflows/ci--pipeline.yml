@@ -61,7 +61,8 @@ jobs:
 
       - name: Upload to S3
         run: |
-          aws s3 cp build-artifacts.zip s3://simartefacts/ --acl public-read
+            TIMESTAMP=$(date +%Y%m%d%H%M%S)
+            aws s3 cp build-artifacts.zip s3://simartefacts/build-artifacts-$TIMESTAMP.zip
 
       - name: Send Email Notification
         env:
