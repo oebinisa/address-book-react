@@ -14,41 +14,48 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      # Set base working directory to avoid double paths
-      - name: Set Working Directory
-        run: cd address-book-react
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
-      - name: Install Dependencies
+      - name: Install Frontend Dependencies
         working-directory: ./client
         run: npm install
 
-      - name: Install Server Dependencies
+      - name: Install Backend Dependencies
         working-directory: ./server
         run: npm install
 
       - name: Build Frontend
         working-directory: ./client
-        run: npm run build
+        run: npm run build 
 
-      - name: Run Client Tests 
+      - name: Run Frontend Tests
         working-directory: ./client
-        run: npm test
-
+        run: npm test || exit 1
+          
       - name: Run Server Tests
         working-directory: ./server
-        run: npm test
+        run: npm test || exit 1
 
       - name: Zip Artifacts
-        run: zip -r build-artifacts.zip client/dist
+        run: |
+          if [ -d "client/dist" ]; then
+            zip -r build-artifacts.zip client/dist
+          else
+            echo "Error: client/dist directory not found"
+            exit 1
+          fi
 
       - name: Upload to S3
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          aws s3 cp build-artifacts.zip s3://simartefacts/
+          aws s3 cp build-artifacts.zip s3://simartefacts/ --acl public-read
 
       - name: Send Email Notification
         env:
