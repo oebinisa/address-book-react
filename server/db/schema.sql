@@ -1,8 +1,8 @@
 -- Create the database
 CREATE DATABASE IF NOT EXISTS address_book;
 
--- Use the database
-USE address_book;
+-- Use the database.
+USE address_book; 
 
 -- Create the contacts table
 CREATE TABLE IF NOT EXISTS contacts (

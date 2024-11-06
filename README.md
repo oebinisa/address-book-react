@@ -1,6 +1,6 @@
 # Mini Address Book App
 
-## React + Express.js + MySQL
+## React + Express.js + MySQL (Basic)
 
 This is a walkthrough on how to create a **React** and **Express.js** Address Book application with **MySQL** as the database, using Vite for the React frontend. The app will consist of a navigation bar with two pages:
 
