@@ -17,7 +17,7 @@
 html, body, #root {
   margin: 0;
   padding: 0;
-  justify-content: center; /* Horizontal alignment */
+  justify-content: center; /* Horizontal alignment. */
   align-items: center;     /* Vertical alignment */
   height: 100vh;           /* Full view height */
   text-align: center;      /* Center align text */
