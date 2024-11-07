@@ -1,0 +1,84 @@
+name: CI Pipeline for Address Book App
+
+on:
+  push:
+    branches:
+      - ci-actions
+  pull_request:
+    branches:
+      - ci-actions
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Frontend Dependencies and Run Tests
+        working-directory: ./client
+        run: |
+            npm install
+            npm test
+
+      - name: Install Backend Dependencies and Run Tests
+        working-directory: ./server
+        run: |
+            npm install
+            npm test
+
+      - name: Build Frontend
+        working-directory: ./client
+        run: npm run build 
+
+      - name: Run Frontend Tests
+        working-directory: ./client
+        run: npm test || exit 1
+          
+      - name: Run Backend Tests
+        working-directory: ./server
+        run: npm test || exit 1
+
+      - name: Zip Artifacts
+        run: |
+          if [ -d "client/dist" ]; then
+            zip -r build-artifacts.zip client/dist
+          else
+            echo "Error: client/dist directory not found"
+            exit 1
+          fi
+
+      - name: Configure AWS Credentials
+        run: |
+            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+            aws configure set default.region us-east-1  # Set to your specific region
+        env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Upload Artifacts to S3
+        run: |
+            TIMESTAMP=$(date +%Y%m%d%H%M%S)
+            aws s3 cp build-artifacts.zip s3://simartefacts/build-artifacts-$TIMESTAMP.zip
+
+      - name: Send Email Notification
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        run: |
+          curl --request POST \
+          --url https://api.sendgrid.com/v3/mail/send \
+          --header "Authorization: Bearer $SENDGRID_API_KEY" \
+          --header "Content-Type: application/json" \
+          --data '{
+            "personalizations": [{"to": [{"email": "o.oluwapelumi@gmail.com"}]}],
+            "from": {"email": "sender@example.com"},
+            "subject": "CI Pipeline Completion",
+            "content": [{"type": "text/plain", "value": "CI pipeline for address-book-react completed successfully."}]
+          }'

@@ -1,6 +1,11 @@
 # Mini Address Book App
+This branch builds on the main repo by implementing Continuous Integration (CI) via GitHub Action.
 
-## React + Express.js + MySQL (Basic)
+**Contents:**
+- Part 1: BAsic App: React + Express.js + MySQL (main)
+- Part 2: CI Pipeline with GitHub Actions with Compressed/Zipped Artifacts (ci-actions)
+
+## Part 1: React + Express.js + MySQL (Basic)
 
 This is a walkthrough on how to create a **React** and **Express.js** Address Book application with **MySQL** as the database, using Vite for the React frontend. The app will consist of a navigation bar with two pages:
 
@@ -466,3 +471,270 @@ Your application should now be running, allowing you to:
 ---
 
 This setup provides a **simple Address Book** application using React, Express.js, and MySQL, following standard practices to manage sensitive credentials in a `.env` file and ensuring smooth communication between the frontend and backend via API routes. The project structure is clean, and the navigation bar allows easy access to the two functionalities (adding and displaying contacts).
+
+
+---
+---
+
+
+## Part 2: CI Pipeline with GitHub Actions with Compressed/Zipped Artifacts (ci-actions)
+
+### Overview
+In this project, we’ll build a CI pipeline using GitHub Actions for the address-book-react app, which consists of:
+ - A frontend built with React,
+ - A backend built with Express.js,
+ - A MySQL database.
+
+ This CI pipeline will:
+1. Install and build the application.
+2. Run tests to verify application integrity.
+3. Compress build artifacts.
+4. Upload compressed artifacts to an S3 bucket (s3://simartefacts/).
+5. Send an email notification upon completion of the CI pipeline.
+
+**Pre-requisites**
+1. Access to the address-book-react GitHub repository.
+2. AWS S3 bucket credentials for s3://simartefacts/.
+3. An email service provider for notifications (e.g., SendGrid or SMTP).
+
+
+### **Step 1: Setting up GitHub Actions Workflow**
+
+1. **Create a new GitHub Actions Workflow file**:
+   - In the *address-book-react* GitHub repository, create a new directory named `.github/workflows`.
+   - Inside this directory, create a YAML file (e.g., `ci-pipeline.yml`) for the CI pipeline configuration.
+
+2. **Define Workflow Triggers**:
+   ```yaml
+   name: CI Pipeline for Address Book App
+
+   on:
+     push:
+       branches:
+         - ci-actions
+     pull_request:
+       branches:
+         - ci-actions
+   ```
+
+3. **Define Job Steps**:
+   - Add a `jobs` section to define the sequence of tasks:
+   ```yaml
+   jobs:
+     build-and-test:
+       runs-on: ubuntu-latest
+       steps:
+   ```
+
+---
+
+### **Step 2: Installing Dependencies and Building the Application**
+
+1. **Checkout the Repository**:
+   ```yaml
+   - name: Checkout Repository
+     uses: actions/checkout@v3
+   ```
+
+2. **Set up Node.js**:
+   ```yaml
+   - name: Set up Node.js
+     uses: actions/setup-node@v3
+     with:
+       node-version: '20'
+   ```
+
+3. **Install Dependencies**:
+   ```yaml
+   - name: Install Frontend Dependencies and Run Tests
+     working-directory: ./client
+     run: |
+        npm install
+        npm test
+
+   - name: Install Backend Dependencies and Run Tests
+     working-directory: ./server
+     run: |
+        npm install
+        npm test
+   ```
+
+4. **Build the React Application**:
+   ```yaml
+   - name: Build Frontend
+     working-directory: ./client
+     run: npm run build
+   ```
+
+5. **Run Tests**:
+   ```yaml
+   - name: Run Frontend Tests
+     working-directory: ./client
+     run: npm test || exit 1
+
+   - name: Run Backend Tests
+     working-directory: ./server
+     run: npm test || exit 1
+   ```
+
+---
+
+### **Step 3: Compress Build Artifacts**
+
+1. **Zip the Build Folder**:
+   ```yaml
+    - name: Zip Artifacts
+      run: |
+        if [ -d "client/dist" ]; then
+          zip -r build-artifacts.zip client/dist
+        else
+          echo "Error: client/dist directory not found"
+          exit 1
+        fi
+   ```
+
+---
+
+### **Step 4: Upload to AWS S3**
+
+1. **Add AWS Credentials**:
+   - Store your AWS access and secret keys in GitHub secrets (`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`).
+
+2. **Upload Artifacts to S3**:
+   ```yaml
+    - name: Configure AWS Credentials
+      run: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          aws configure set default.region us-east-1  # Set to your specific region
+      env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    - name: Upload Artifacts to S3
+      run: |
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          aws s3 cp build-artifacts.zip s3://simartefacts/build-artifacts-$TIMESTAMP.zip
+   ```
+
+---
+
+### **Step 5: Send Email Notifications**
+
+1. **Define Email Step Using SendGrid or SMTP**:
+   - For SendGrid:
+     ```yaml
+      - name: Send Email Notification
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        run: |
+          curl --request POST \
+          --url https://api.sendgrid.com/v3/mail/send \
+          --header "Authorization: Bearer $SENDGRID_API_KEY" \
+          --header "Content-Type: application/json" \
+          --data '{
+            "personalizations": [{"to": [{"email": "o.oluwapelumi@gmail.com"}]}],
+            "from": {"email": "sender@example.com"},
+            "subject": "CI Pipeline Completion",
+            "content": [{"type": "text/plain", "value": "CI pipeline for address-book-react completed successfully."}]
+          }'
+     ```
+
+---
+
+### **Full GitHub Actions Workflow (ci-pipeline.yml)**
+
+Here’s a complete view of the `ci-pipeline.yml` file:
+
+```yaml
+name: CI Pipeline for Address Book App
+
+on:
+  push:
+    branches:
+      - ci-actions
+  pull_request:
+    branches:
+      - ci-actions
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Frontend Dependencies and Run Tests
+        working-directory: ./client
+        run: |
+            npm install
+            npm test
+
+      - name: Install Backend Dependencies and Run Tests
+        working-directory: ./server
+        run: |
+            npm install
+            npm test
+
+      - name: Build Frontend
+        working-directory: ./client
+        run: npm run build 
+
+      - name: Run Frontend Tests
+        working-directory: ./client
+        run: npm test || exit 1
+          
+      - name: Run Backend Tests
+        working-directory: ./server
+        run: npm test || exit 1
+
+      - name: Zip Artifacts
+        run: |
+          if [ -d "client/dist" ]; then
+            zip -r build-artifacts.zip client/dist
+          else
+            echo "Error: client/dist directory not found"
+            exit 1
+          fi
+
+      - name: Configure AWS Credentials
+        run: |
+            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+            aws configure set default.region us-east-1  # Set to your specific region
+        env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Upload Artifacts to S3
+        run: |
+            TIMESTAMP=$(date +%Y%m%d%H%M%S)
+            aws s3 cp build-artifacts.zip s3://simartefacts/build-artifacts-$TIMESTAMP.zip
+
+      - name: Send Email Notification
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        run: |
+          curl --request POST \
+          --url https://api.sendgrid.com/v3/mail/send \
+          --header "Authorization: Bearer $SENDGRID_API_KEY" \
+          --header "Content-Type: application/json" \
+          --data '{
+            "personalizations": [{"to": [{"email": "o.oluwapelumi@gmail.com"}]}],
+            "from": {"email": "sender@example.com"},
+            "subject": "CI Pipeline Completion",
+            "content": [{"type": "text/plain", "value": "CI pipeline for address-book-react completed successfully."}]
+          }'
+```
+
+---
+
+
+This comprehensive setup ensures a robust CI pipeline, pthat handles practical DevOps tasks end-to-end.
+
