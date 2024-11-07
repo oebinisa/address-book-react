@@ -2,10 +2,10 @@
 This branch builds on the main repo by implementing Continuous Integration (CI) via GitHub Action.
 
 **Contents:**
-- Part 1: BAsic App: React + Express.js + MySQL (main)
+- Part 1: Basic App: React + Express.js + MySQL (main)
 - Part 2: CI Pipeline with GitHub Actions with Compressed/Zipped Artifacts (ci-actions)
 
-## Part 1: React + Express.js + MySQL (Basic)
+## Part 1: BAsic App: React + Express.js + MySQL (main branch)
 
 This is a walkthrough on how to create a **React** and **Express.js** Address Book application with **MySQL** as the database, using Vite for the React frontend. The app will consist of a navigation bar with two pages:
 
@@ -532,49 +532,49 @@ In this project, we’ll build a CI pipeline using GitHub Actions for the addres
 
 1. **Checkout the Repository**:
    ```yaml
-   - name: Checkout Repository
-     uses: actions/checkout@v3
+    - name: Checkout Repository
+      uses: actions/checkout@v3
    ```
 
 2. **Set up Node.js**:
    ```yaml
-   - name: Set up Node.js
-     uses: actions/setup-node@v3
-     with:
-       node-version: '20'
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
    ```
 
 3. **Install Dependencies**:
    ```yaml
-   - name: Install Frontend Dependencies and Run Tests
-     working-directory: ./client
-     run: |
+    - name: Install Frontend Dependencies and Run Tests
+      working-directory: ./client
+      run: |
         npm install
         npm test
 
-   - name: Install Backend Dependencies and Run Tests
-     working-directory: ./server
-     run: |
+    - name: Install Backend Dependencies and Run Tests
+      working-directory: ./server
+      run: |
         npm install
         npm test
    ```
 
 4. **Build the React Application**:
    ```yaml
-   - name: Build Frontend
-     working-directory: ./client
-     run: npm run build
+    - name: Build Frontend
+      working-directory: ./client
+      run: npm run build
    ```
 
 5. **Run Tests**:
    ```yaml
-   - name: Run Frontend Tests
-     working-directory: ./client
-     run: npm test || exit 1
+    - name: Run Frontend Tests
+      working-directory: ./client
+      run: npm test || exit 1
 
-   - name: Run Backend Tests
-     working-directory: ./server
-     run: npm test || exit 1
+    - name: Run Backend Tests
+      working-directory: ./server
+      run: npm test || exit 1
    ```
 
 ---
@@ -733,7 +733,6 @@ jobs:
           }'
 ```
 
----
 
 
 This comprehensive setup ensures a robust CI pipeline, pthat handles practical DevOps tasks end-to-end.

@@ -43,7 +43,7 @@ jobs:
           
       - name: Run Backend Tests
         working-directory: ./server
-        run: npm test || exit 1
+        run: npm testy || exit 1
 
       - name: Zip Artifacts
         run: |
