@@ -78,7 +78,7 @@ jobs:
           --header "Content-Type: application/json" \
           --data '{
             "personalizations": [{"to": [{"email": "o.oluwapelumi@gmail.com"}]}],
-            "from": {"email": "sender@example.com"},
+            "from": {"email": "developer@simionisystems.com"},
             "subject": "CI Pipeline Completion",
             "content": [{"type": "text/plain", "value": "CI pipeline for address-book-react completed successfully."}]
           }'
