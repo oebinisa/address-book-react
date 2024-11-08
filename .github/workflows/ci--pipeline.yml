@@ -21,13 +21,13 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Frontend Dependencies and Run Tests
+      - name: Install Frontend Dependencies and Run Jest Tests
         working-directory: ./client
         run: |
             npm install
             npm test
 
-      - name: Install Backend Dependencies and Run Tests
+      - name: Install Backend Dependencies and Run Jest Tests
         working-directory: ./server
         run: |
             npm install
