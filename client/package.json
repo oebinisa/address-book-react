@@ -16,7 +16,7 @@
       "\\.(css|scss|sass)$": "identity-obj-proxy"
     },
     "setupFilesAfterEnv": [
-      "@testing-library/jest-dom/extend-expect"
+      "@testing-library/jest-dom"
     ],
     "transform": {
       "^.+\\.jsx?$": "babel-jest"
