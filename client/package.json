@@ -16,11 +16,15 @@
       "\\.(css|scss|sass)$": "identity-obj-proxy"
     },
     "setupFilesAfterEnv": [
-      "@testing-library/jest-dom"
+      "@testing-library/jest-dom",
+      "<rootDir>/jest.setup.js"
     ],
     "transform": {
-      "^.+\\.jsx?$": "babel-jest"
-    }
+      "^.+\\.[jt]sx?$": "babel-jest"
+    },
+    "transformIgnorePatterns": [
+      "<rootDir>/node_modules/"
+    ]
   },
   "dependencies": {
     "axios": "^1.7.7",

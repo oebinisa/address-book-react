@@ -763,26 +763,30 @@ This comprehensive setup ensures a robust CI pipeline, pthat handles practical D
    yarn init -y
    yarn add jest @testing-library/dom @testing-library/react @testing-library/jest-dom babel-jest identity-obj-proxy --dev
    yarn add -D@babel/preset-env @babel/preset-react jest-environment-jsdom
-```
+   ```
 
 3. **Add Jest Configurations** to `client/package.json`:
-   ```json
-   {
-     "jest": {
-       "testEnvironment": "jsdom",
-       "moduleNameMapper": {
-         "\\.(css|scss|sass)$": "identity-obj-proxy"
-       },
-       "setupFilesAfterEnv": ["@testing-library/jest-dom"],
-       "transform": {
-         "^.+\\.jsx?$": "babel-jest"
-       }
-     },
-     "scripts": {
-       "test": "jest"
-     }
-   }
-   ```
+
+  ```json
+  {
+  "jest": {
+    "testEnvironment": "jsdom",
+    "moduleNameMapper": {
+      "\\.(css|scss|sass)$": "identity-obj-proxy"
+    },
+    "setupFilesAfterEnv": [
+      "@testing-library/jest-dom",
+      "<rootDir>/jest.setup.js"
+    ],
+    "transform": {
+      "^.+\\.[jt]sx?$": "babel-jest"
+    },
+    "transformIgnorePatterns": [
+      "<rootDir>/node_modules/"
+    ]
+  }
+  }
+  ```
 
 4. **Update the Babel Configuration** for Jest compatibility. Create a `.babelrc` file in the `client` directory:
    ```json
@@ -792,19 +796,43 @@ This comprehensive setup ensures a robust CI pipeline, pthat handles practical D
    ```
 
 5. **Update `vite.config.js`** in the client folder to work well with Jest:
-   ```javascript
-   import { defineConfig } from 'vite';
-   import react from '@vitejs/plugin-react';
+  ```javascript
+  import { defineConfig } from 'vite'
+  import react from "@vitejs/plugin-react";
+  import react from '@vitejs/plugin-react-swc'
 
-   export default defineConfig({
-     plugins: [react()],
-     test: {
-       environment: 'jsdom',
-     },
-   });
-   ```
+  // https://vitejs.dev/config/
+  export default defineConfig({
+    plugins: [react()],
+    test: {
+      environment: "jsdom",
+    },
+    define: {
+      "import.meta.env.VITE_API_URL": JSON.stringify(
+        process.env.VITE_API_URL || "http://localhost:5000"
+      ),
+    },
+  });
+  ```
 
-6. **Add a Sample Test** in `client/src/components/ContactForm.test.jsx`:
+6. **Add a Jest Setup File** `jest.setup.js` file in your project root to mock `import.meta.env`.
+```javascript
+// client/jest.setup.js
+globalThis.importMetaEnv = {
+  VITE_API_URL: "http://localhost:5000", // default or testing URL
+};
+
+// Mock import.meta.env
+Object.defineProperty(global, "import", {
+  value: {
+    meta: {
+      env: globalThis.importMetaEnv,
+    },
+  },
+});
+```
+
+7. **Add a Sample Test** in `client/src/components/ContactForm.test.jsx`:
    ```javascript
    import { render, screen } from '@testing-library/react';
    import ContactForm from './ContactForm';
