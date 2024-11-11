@@ -4,6 +4,7 @@ This branch builds on the main repo by implementing Continuous Integration (CI) 
 **Contents:**
 - Part 1: Basic App: React + Express.js + MySQL (main)
 - Part 2: CI Pipeline with GitHub Actions with Compressed/Zipped Artifacts (ci-actions)
+- Part 3: Incorporation of Yarn and Jest testing into the app and CI pipeline
 
 ## Part 1: BAsic App: React + Express.js + MySQL (main branch)
 
@@ -733,7 +734,174 @@ jobs:
           }'
 ```
 
-
-
 This comprehensive setup ensures a robust CI pipeline, pthat handles practical DevOps tasks end-to-end.
+
+---
+
+
+## Part 3: Incorporation of Yarn and Jest testing into the app and CI pipeline
+
+### Overview
+1. **Install and Configure Jest** with Yarn for both client and server.
+2. **Add Testing Scripts** in `package.json` files.
+3. **Optimize Jest Configurations for Vite** for the frontend.
+4. **Configure Vite for Yarn Compatibility**.
+5. **Run Tests** with Yarn.
+
+
+### Step 1: Configure Yarn and Jest in the Frontend (`client`)
+
+1. **Navigate to the client folder:**
+   ```bash
+   cd address-book-react/client
+   ```
+
+2. **Install and Initialize Yarn and Install Jest:**
+   ```bash
+   npm install -g yarn
+   yarn --version
+   yarn init -y
+   yarn add jest @testing-library/react @testing-library/jest-dom babel-jest identity-obj-proxy --dev
+   ```
+
+3. **Add Jest Configurations** to `client/package.json`:
+   ```json
+   {
+     "jest": {
+       "testEnvironment": "jsdom",
+       "moduleNameMapper": {
+         "\\.(css|scss|sass)$": "identity-obj-proxy"
+       },
+       "setupFilesAfterEnv": ["@testing-library/jest-dom/extend-expect"],
+       "transform": {
+         "^.+\\.jsx?$": "babel-jest"
+       }
+     },
+     "scripts": {
+       "test": "jest"
+     }
+   }
+   ```
+
+4. **Update the Babel Configuration** for Jest compatibility. Create a `.babelrc` file in the `client` directory:
+   ```json
+   {
+     "presets": ["@babel/preset-env", "@babel/preset-react"]
+   }
+   ```
+
+5. **Update `vite.config.js`** in the client folder to work well with Jest:
+   ```javascript
+   import { defineConfig } from 'vite';
+   import react from '@vitejs/plugin-react';
+
+   export default defineConfig({
+     plugins: [react()],
+     test: {
+       environment: 'jsdom',
+     },
+   });
+   ```
+
+6. **Add a Sample Test** in `client/src/components/ContactForm.test.jsx`:
+   ```javascript
+   import { render, screen } from '@testing-library/react';
+   import ContactForm from './ContactForm';
+
+   test('renders ContactForm component', () => {
+     render(<ContactForm />);
+     expect(screen.getByText(/submit/i)).toBeInTheDocument();
+   });
+   ```
+
+---
+
+### Step 2: Configure Yarn and Jest in the Backend (`server`)
+
+1. **Navigate to the server folder:**
+   ```bash
+   cd ../server
+   ```
+
+2. **Initialize Yarn and Install Jest:**
+   ```bash
+   yarn init -y
+   yarn add jest supertest --dev
+   ```
+
+3. **Add Jest Configurations** to `server/package.json`:
+   ```json
+   {
+     "jest": {
+       "testEnvironment": "node"
+     },
+     "scripts": {
+       "test": "jest"
+     }
+   }
+   ```
+
+4. **Add a Sample Test** in `server/tests/contactRoutes.test.js`:
+   - Create the `tests` directory and add a test for the `contactRoutes.js`.
+   ```javascript
+   const request = require('supertest');
+   const app = require('../server');
+
+   describe('GET /contacts', () => {
+     it('responds with a list of contacts', async () => {
+       const response = await request(app).get('/contacts');
+       expect(response.statusCode).toBe(200);
+       expect(Array.isArray(response.body)).toBe(true);
+     });
+   });
+   ```
+
+---
+
+### Step 3: Root Level Yarn Configuration
+
+1. **Return to the root directory** of your project:
+   ```bash
+   cd ..
+   ```
+
+2. **Install Jest Globally** for the root to ensure both `client` and `server` tests can be run:
+   ```bash
+   yarn add jest --dev
+   ```
+
+3. **Add a Root-Level Testing Script** to `address-book-react/package.json`:
+   - Add `workspaces` to enable root-level Yarn commands for both `client` and `server`.
+   - Add a `test` script to run both tests at once.
+   ```json
+   {
+     "private": true,
+     "workspaces": ["client", "server"],
+     "scripts": {
+       "test": "yarn workspace client test && yarn workspace server test"
+     }
+   }
+   ```
+
+---
+
+### Step 4: Running the Tests
+
+From the root of your project, you can now run all tests in both the frontend and backend by executing:
+
+```bash
+yarn test
+```
+
+This command will run Jest tests for both `client` and `server` directories, allowing you to confirm that the application is working as expected.
+
+--- 
+
+### Summary
+
+This setup ensures:
+- **Frontend (client)** uses Jest and Testing Library for React testing.
+- **Backend (server)** uses Jest and Supertest for API route testing.
+- **Unified Testing Command** from the project’s root using Yarn.
+
 

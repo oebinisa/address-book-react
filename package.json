@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "test": "yarn workspace client test && yarn workspace server test"
+  }
+}
