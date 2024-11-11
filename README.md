@@ -761,7 +761,7 @@ This comprehensive setup ensures a robust CI pipeline, pthat handles practical D
    npm install -g yarn
    yarn --version
    yarn init -y
-   yarn add jest @testing-library/react @testing-library/jest-dom babel-jest identity-obj-proxy --dev
+   yarn add jest @testing-library/dom @testing-library/react @testing-library/jest-dom babel-jest identity-obj-proxy --dev
    yarn add -D@babel/preset-env @babel/preset-react jest-environment-jsdom
 ```
 
@@ -828,7 +828,7 @@ This comprehensive setup ensures a robust CI pipeline, pthat handles practical D
    ```bash
    yarn init -y
    yarn add jest supertest --dev
-   yarn add -D @babel/preset-env @babel/preset-react jest-environment-jsdom
+   yarn add -D @babel/preset-env @testing-library/dom @babel/preset-react jest-environment-jsdom
 ```
 
 3. **Add Jest Configurations** to `server/package.json`:
