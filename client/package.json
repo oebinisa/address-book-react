@@ -20,7 +20,7 @@
       "<rootDir>/jest.setup.js"
     ],
     "transform": {
-      "^.+\\.[jt]sx?$": "babel-jest",
+      "^.+\\.[jt]sx?$": "babel-jest"
     },
     "transformIgnorePatterns": [
       "<rootDir>/node_modules/",
