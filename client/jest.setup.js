@@ -1,7 +1,5 @@
 // jest.setup.js
-globalThis.importMetaEnv = {
-  VITE_API_URL: "http://localhost:5000", // default or testing URL
-};
+globalThis.importMeta = { env: { VITE_API_URL: 'http://localhost' } };
 
 // Mock import.meta.env
 Object.defineProperty(global, "import", {
