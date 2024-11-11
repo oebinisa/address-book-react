@@ -762,7 +762,7 @@ This comprehensive setup ensures a robust CI pipeline, pthat handles practical D
    yarn --version
    yarn init -y
    yarn add jest @testing-library/react @testing-library/jest-dom babel-jest identity-obj-proxy --dev
-   yarn add -D jest-environment-jsdom
+   yarn add -D@babel/preset-env @babel/preset-react jest-environment-jsdom
 ```
 
 3. **Add Jest Configurations** to `client/package.json`:
@@ -773,7 +773,7 @@ This comprehensive setup ensures a robust CI pipeline, pthat handles practical D
        "moduleNameMapper": {
          "\\.(css|scss|sass)$": "identity-obj-proxy"
        },
-       "setupFilesAfterEnv": ["@testing-library/jest-dom/extend-expect"],
+       "setupFilesAfterEnv": ["@testing-library/jest-dom"],
        "transform": {
          "^.+\\.jsx?$": "babel-jest"
        }
@@ -828,7 +828,7 @@ This comprehensive setup ensures a robust CI pipeline, pthat handles practical D
    ```bash
    yarn init -y
    yarn add jest supertest --dev
-   yarn add -D jest-environment-jsdom
+   yarn add -D @babel/preset-env @babel/preset-react jest-environment-jsdom
 ```
 
 3. **Add Jest Configurations** to `server/package.json`:
