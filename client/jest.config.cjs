@@ -1,4 +1,6 @@
 // jest.config.cjs
+const path = require("path");
+
 module.exports = {
   testEnvironment: "jsdom",
   moduleNameMapper: {
@@ -6,7 +8,10 @@ module.exports = {
   },
   setupFilesAfterEnv: ["@testing-library/jest-dom", "<rootDir>/jest.setup.js"],
   transform: {
-    "^.+\\.[jt]sx?$": ["babel-jest", { configFile: "./babel.config.cjs" }],
+    "^.+\\.[jt]sx?$": [
+      "babel-jest",
+      { configFile: path.resolve(__dirname, "babel.config.cjs") },
+    ],
   },
   transformIgnorePatterns: [
     "<rootDir>/node_modules/",

@@ -762,40 +762,56 @@ This comprehensive setup ensures a robust CI pipeline, pthat handles practical D
    yarn --version
    yarn init -y
    yarn add jest @testing-library/dom @testing-library/react @testing-library/jest-dom babel-jest identity-obj-proxy --dev
-   yarn add -D@babel/preset-env @babel/preset-react jest-environment-jsdom
+   yarn add -D @babel/preset-env @babel/preset-react jest-environment-jsdom @babel/plugin-transform-runtime --dev
    ```
 
-3. **Add Jest Configurations** to `client/package.json`:
+3. **Install Some Other Required Babel Plugin**
+  ```bash 
+  npm install babel-plugin-transform-import-meta --save-dev
+  npm install @babel/preset-env @babel/preset-react @babel/plugin-transform-runtime babel-jest --save-dev
+  ```
 
+4. **Create `babel.config.cjs`:**
+  - This will contain the configuration for Babel to use when transforming files for Jest.
+  ```javascript
+  // client/babel.config.cjs
+  module.exports = {
+    presets: ["@babel/preset-env", "@babel/preset-react"],
+    plugins: [
+      "@babel/plugin-transform-runtime",
+      "babel-plugin-transform-import-meta",
+    ],
+  };
+  ```
+
+5. **Create a Jest COnfiguration:** `jest.config.cjs` file in your project:
+  ```javascript
+    // client/jest.config.cjs
+  module.exports = {
+    testEnvironment: "jsdom",
+    moduleNameMapper: {
+      "\\.(css|scss|sass)$": "identity-obj-proxy",
+    },
+    setupFilesAfterEnv: ["@testing-library/jest-dom", "<rootDir>/jest.setup.js"],
+    transform: {
+      "^.+\\.[jt]sx?$": ["babel-jest", { configFile: "./babel.config.cjs" }],
+    },
+    transformIgnorePatterns: [
+      "<rootDir>/node_modules/",
+      "/node_modules/(?!@testing-library/react|some-other-modules-to-transform)",
+    ],
+  };
+  ```
+
+6. **Update the Babel Configuration** for Jest compatibility. Create a `.babelrc` file in the `client` directory:
   ```json
   {
-  "jest": {
-    "testEnvironment": "jsdom",
-    "moduleNameMapper": {
-      "\\.(css|scss|sass)$": "identity-obj-proxy"
-    },
-    "setupFilesAfterEnv": [
-      "@testing-library/jest-dom",
-      "<rootDir>/jest.setup.js"
-    ],
-    "transform": {
-      "^.+\\.[jt]sx?$": "babel-jest"
-    },
-    "transformIgnorePatterns": [
-      "<rootDir>/node_modules/"
-    ]
-  }
+    "presets": ["@babel/preset-env", "@babel/preset-react"],
+    "plugins": ["@babel/plugin-transform-runtime"]
   }
   ```
 
-4. **Update the Babel Configuration** for Jest compatibility. Create a `.babelrc` file in the `client` directory:
-   ```json
-   {
-     "presets": ["@babel/preset-env", "@babel/preset-react"]
-   }
-   ```
-
-5. **Update `vite.config.js`** in the client folder to work well with Jest:
+7. **Update `vite.config.js`** in the client folder to work well with Jest:
   ```javascript
   import { defineConfig } from 'vite'
   import react from "@vitejs/plugin-react";
@@ -815,11 +831,11 @@ This comprehensive setup ensures a robust CI pipeline, pthat handles practical D
   });
   ```
 
-6. **Add a Jest Setup File** `jest.setup.js` file in your project root to mock `import.meta.env`.
+8. **Add a Jest Setup File** `jest.setup.js` file in your project root to mock `import.meta.env`.
 ```javascript
 // client/jest.setup.js
 globalThis.importMetaEnv = {
-  VITE_API_URL: "http://localhost:5000", // default or testing URL
+  env: { VITE_API_URL: 'http://localhost' } // default or testing URL
 };
 
 // Mock import.meta.env
@@ -832,7 +848,7 @@ Object.defineProperty(global, "import", {
 });
 ```
 
-7. **Add a Sample Test** in `client/src/components/ContactForm.test.jsx`:
+9. **Add a Sample Test** in `client/src/components/ContactForm.test.jsx`:
    ```javascript
    import { render, screen } from '@testing-library/react';
    import ContactForm from './ContactForm';
